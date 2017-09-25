@@ -49,16 +49,6 @@ const htmlmin = require('gulp-htmlmin');
 /** 
     ====================开发相关=========================
 **/
-gulp.task('test-clean', function () {
-    gulp.src(['test/static/*', 'test/lib/*', 'test/devtool/*'], {
-            read: false,
-        })
-        .pipe(plumber({
-            errorHandler: notify.onError('你清理test下的static或者lib或者devtool目录出错了: <%= error.message %>')
-        }))
-        .pipe(clean())
-        .pipe(browserSync.stream());
-});
 gulp.task('test-clean_static', function () {
     gulp.src(['test/static/*'], {
             read: false,
@@ -175,7 +165,7 @@ gulp.task('test-copy-html', function () {
         .pipe(gulp.dest('test'))
         .pipe(browserSync.stream());
 });
-gulp.task('browser-sync', ['test-clean', 'test-sass', 'test-script', 'test-copy-static', 'test-copy-lib', 'test-copy-html', 'test-copy-devtool'], function () {
+gulp.task('browser-sync', ['test-sass', 'test-script', 'test-copy-static', 'test-copy-lib', 'test-copy-devtool', 'test-copy-html'], function () {
     browserSync.init({
         server: {
             // baseDir: '../',
