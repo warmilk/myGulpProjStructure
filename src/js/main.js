@@ -1,3 +1,3 @@
-function aa(){
-    return 0;
+var quying = ()=>{
+    return console.log();
 }

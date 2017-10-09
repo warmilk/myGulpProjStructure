@@ -65,11 +65,14 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-function aa() {
-    return 0;
-}
+"use strict";
+
+
+var quying = function quying() {
+    return console.log();
+};
 
 /***/ })
 /******/ ]);

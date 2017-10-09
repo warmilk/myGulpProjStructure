@@ -37,7 +37,8 @@ const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 // html压缩
 const htmlmin = require('gulp-htmlmin');
-
+// 去除js和html的console.log
+const removeConsolelog = require("gulp-remove-logging");
 
 
 
@@ -195,15 +196,6 @@ gulp.task('browser-sync', ['test-sass', 'test-script', 'test-copy-static', 'test
     ====================上线相关=========================
 **/
 // 清除旧版本的js/和css/和static/和lib/
-gulp.task('clean', function () {
-    gulp.src(['dest/css/*', 'dest/js/*', 'dest/static/*', 'dest/lib/*'], {
-            read: false,
-        })
-        .pipe(plumber({
-            errorHandler: notify.onError('你清理dest下的js/css/static/lib目录出错了: <%= error.message %>')
-        }))
-        .pipe(clean());
-});
 gulp.task('sass', function () {
     return gulp.src('src/css/*.scss')
         .pipe(plumber({
@@ -217,9 +209,9 @@ gulp.task('sass', function () {
         // .pipe(concat('main.css'))
         // .pipe(assetRev())
         .pipe(cssnano())
-        .pipe(rename({
-            suffix: '.min',
-        }))
+        // .pipe(rename({
+        //     suffix: '.min',
+        // }))
         .pipe(gulp.dest('dest/css'));
 });
 gulp.task('script', function () {
@@ -227,6 +219,13 @@ gulp.task('script', function () {
         .pipe(plumber({
             errorHandler: notify.onError('你写的js有猫饼: <%= error.message %>'),
         }))
+        .pipe(
+            removeConsolelog({
+                // Options (optional) 
+                // eg: 
+                // namespace: ['console', 'window.console'] 
+            })
+        )
         .pipe(babel())
         .pipe(webpack({
             // https://www.npmjs.com/package/webpack-stream
@@ -251,13 +250,13 @@ gulp.task('script', function () {
         }))
         // .pipe(assetRev())
         .pipe(uglify())
-        .pipe(rename({
-            suffix: '.min',
-        }))
+        // .pipe(rename({
+        //     suffix: '.min',
+        // }))
         .pipe(gulp.dest('dest/js'));
 });
 gulp.task('copy-lib', function () {
-    return gulp.src('src/lib/**/*')
+    return gulp.src('test/lib/**/*')
         .pipe(plumber({
             errorHandler: notify.onError('你复制lib到dest出错了: <%= error.message %>'),
         }))
@@ -266,7 +265,7 @@ gulp.task('copy-lib', function () {
         .pipe(browserSync.stream());
 });
 gulp.task('copy-static', function () {
-    return gulp.src('src/static/**/*')
+    return gulp.src('test/static/**/*')
         .pipe(plumber({
             errorHandler: notify.onError('你复制static到dest出错了: <%= error.message %>'),
         }))
@@ -288,6 +287,13 @@ gulp.task('minihtml', function () {
         .pipe(plumber({
             errorHandler: notify.onError('你压缩html到dest出错了: <%= error.message %>'),
         }))
+        .pipe(
+            removeConsolelog({
+                // Options (optional) 
+                // eg: 
+                // namespace: ['console', 'window.console'] 
+            })
+        )
         .pipe(htmlmin(options))
         // .pipe(assetRev())
         .pipe(gulp.dest('dest'));
@@ -314,7 +320,7 @@ gulp.task('minihtml', function () {
 //         .pipe(gulp.dest('dest/css'));
 // });
 // 生成最终上线代码
-gulp.task('release', ['clean', 'sass', 'script', 'copy-static', 'copy-lib', 'minihtml'], function () {
+gulp.task('release', ['sass', 'script', 'copy-static', 'copy-lib', 'minihtml'], function () {
     return notify({
         message: '大吉大利！代码release已完成！'
     });
@@ -329,7 +335,8 @@ gulp.task('release', ['clean', 'sass', 'script', 'copy-static', 'copy-lib', 'min
 
 
 
-
-
-
 gulp.task('default', ['browser-sync']);
+
+
+
+
