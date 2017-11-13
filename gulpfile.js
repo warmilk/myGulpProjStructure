@@ -1,5 +1,5 @@
 /** 
-||| gulp官方教程
+||| @gulp官方教程
 ||| https://github.com/gulpjs/gulp/tree/master/docs
 **/
 
@@ -23,6 +23,9 @@ const babel = require('gulp-babel');
 const webpack = require('webpack-stream');
 // browser-sync
 const browserSync = require('browser-sync').create();
+// 代理中间件（解决发请求时跨域）
+const proxyMiddleware = require('http-proxy-middleware');
+
 
 /** 
     ====================上线相关=========================
@@ -50,8 +53,8 @@ const removeConsolelog = require("gulp-remove-logging");
 /** 
     ====================开发相关=========================
 **/
-gulp.task('test-clean_static', function () {
-    gulp.src(['test/static/*'], {
+gulp.task('test-clean_static', function() {
+    return gulp.src(['test/static/*'], {
             read: false,
         })
         .pipe(plumber({
@@ -60,8 +63,8 @@ gulp.task('test-clean_static', function () {
         .pipe(clean())
         .pipe(browserSync.stream());
 });
-gulp.task('test-clean_lib', function () {
-    gulp.src(['test/lib/*'], {
+gulp.task('test-clean_lib', function() {
+    return gulp.src(['test/lib/*'], {
             read: false,
         })
         .pipe(plumber({
@@ -70,8 +73,8 @@ gulp.task('test-clean_lib', function () {
         .pipe(clean())
         .pipe(browserSync.stream());
 });
-gulp.task('test-clean_devtool', function () {
-    gulp.src(['test/devtool/*'], {
+gulp.task('test-clean_devtool', function() {
+    return gulp.src(['test/devtool/*'], {
             read: false,
         })
         .pipe(plumber({
@@ -80,7 +83,7 @@ gulp.task('test-clean_devtool', function () {
         .pipe(clean())
         .pipe(browserSync.stream());
 });
-gulp.task('test-sass', function () {
+gulp.task('test-sass', function() {
     return gulp.src('src/css/*.scss')
         .pipe(plumber({
             errorHandler: notify.onError('你写的scss有猫病: <%= error.message %>'),
@@ -97,7 +100,7 @@ gulp.task('test-sass', function () {
         .pipe(gulp.dest('test/css'))
         .pipe(browserSync.stream());
 });
-gulp.task('test-script', function () {
+gulp.task('test-script', function() {
     return gulp.src('src/js/*.js')
         .pipe(plumber({
             errorHandler: notify.onError('你写的js有猫病: <%= error.message %>'),
@@ -130,7 +133,7 @@ gulp.task('test-script', function () {
         .pipe(gulp.dest('test/js'))
         .pipe(browserSync.stream());
 });
-gulp.task('test-copy-static', function () {
+gulp.task('test-copy-static', function() {
     return gulp.src('src/static/**/*')
         .pipe(plumber({
             errorHandler: notify.onError('你的static目录搬家出错了: <%= error.message %>')
@@ -139,7 +142,7 @@ gulp.task('test-copy-static', function () {
         .pipe(gulp.dest('test/static/'))
         .pipe(browserSync.stream());
 });
-gulp.task('test-copy-lib', function () {
+gulp.task('test-copy-lib', function() {
     return gulp.src('src/lib/**/*')
         .pipe(plumber({
             errorHandler: notify.onError('你的lib目录搬家出错了: <%= error.message %>')
@@ -148,7 +151,7 @@ gulp.task('test-copy-lib', function () {
         .pipe(gulp.dest('test/lib/'))
         .pipe(browserSync.stream());
 });
-gulp.task('test-copy-devtool', function () {
+gulp.task('test-copy-devtool', function() {
     return gulp.src('src/devtool/**/*')
         .pipe(plumber({
             errorHandler: notify.onError('你的devtool目录搬家出错了: <%= error.message %>')
@@ -157,7 +160,7 @@ gulp.task('test-copy-devtool', function () {
         .pipe(gulp.dest('test/devtool/'))
         .pipe(browserSync.stream());
 });
-gulp.task('test-copy-html', function () {
+gulp.task('test-copy-html', function() {
     return gulp.src('src/*.html')
         .pipe(plumber({
             errorHandler: notify.onError('你的index.html搬家出错了: <%= error.message %>')
@@ -166,10 +169,31 @@ gulp.task('test-copy-html', function () {
         .pipe(gulp.dest('test'))
         .pipe(browserSync.stream());
 });
-gulp.task('browser-sync', ['test-sass', 'test-script', 'test-copy-static', 'test-copy-lib', 'test-copy-devtool', 'test-copy-html'], function () {
+/**配置代理中间件开始 */
+const proxyTable = {
+    '/aaticket/api': {
+        target: 'http://aaticket.dyyz1993.com/',
+        changeOrigin: true,
+        logLevel: 'debug'
+    }
+}
+const proxyArr = [];
+Object.keys(proxyTable).forEach(function(context) {
+    var options = proxyTable[context];
+    if (typeof options === 'string') {
+        options = {
+            target: options
+        }
+    }
+    proxyArr.push(proxyMiddleware(context, options));
+});
+/**配置代理中间件结束 */
+gulp.task('browser-sync', ['test-sass', 'test-script', 'test-copy-static', 'test-copy-lib', 'test-copy-devtool', 'test-copy-html'], function() {
     browserSync.init({
         server: {
-            // baseDir: '../',
+            baseDir: './',
+            port: 4000,
+            middleware: proxyArr
         },
         // middleware: proxyArr,
         port: '3005',
@@ -196,7 +220,7 @@ gulp.task('browser-sync', ['test-sass', 'test-script', 'test-copy-static', 'test
     ====================上线相关=========================
 **/
 // 清除旧版本的js/和css/和static/和lib/
-gulp.task('sass', function () {
+gulp.task('sass', function() {
     return gulp.src('src/css/*.scss')
         .pipe(plumber({
             errorHandler: notify.onError('你写的scss有猫病: <%= error.message %>'),
@@ -214,7 +238,7 @@ gulp.task('sass', function () {
         // }))
         .pipe(gulp.dest('dest/css'));
 });
-gulp.task('script', function () {
+gulp.task('script', function() {
     return gulp.src('src/js/*.js')
         .pipe(plumber({
             errorHandler: notify.onError('你写的js有猫饼: <%= error.message %>'),
@@ -255,7 +279,7 @@ gulp.task('script', function () {
         // }))
         .pipe(gulp.dest('dest/js'));
 });
-gulp.task('copy-lib', function () {
+gulp.task('copy-lib', function() {
     return gulp.src('test/lib/**/*')
         .pipe(plumber({
             errorHandler: notify.onError('你复制lib到dest出错了: <%= error.message %>'),
@@ -264,7 +288,7 @@ gulp.task('copy-lib', function () {
         .pipe(gulp.dest('dest/lib'))
         .pipe(browserSync.stream());
 });
-gulp.task('copy-static', function () {
+gulp.task('copy-static', function() {
     return gulp.src('test/static/**/*')
         .pipe(plumber({
             errorHandler: notify.onError('你复制static到dest出错了: <%= error.message %>'),
@@ -272,7 +296,7 @@ gulp.task('copy-static', function () {
         // .pipe(assetRev())
         .pipe(gulp.dest('dest/static'));
 });
-gulp.task('minihtml', function () {
+gulp.task('minihtml', function() {
     var options = {
         removeComments: true, //清除HTML注释
         collapseWhitespace: true, //压缩HTML
@@ -320,7 +344,7 @@ gulp.task('minihtml', function () {
 //         .pipe(gulp.dest('dest/css'));
 // });
 // 生成最终上线代码
-gulp.task('release', ['sass', 'script', 'copy-static', 'copy-lib', 'minihtml'], function () {
+gulp.task('release', ['sass', 'script', 'copy-static', 'copy-lib', 'minihtml'], function() {
     return notify({
         message: '大吉大利！代码release已完成！'
     });
@@ -336,7 +360,3 @@ gulp.task('release', ['sass', 'script', 'copy-static', 'copy-lib', 'minihtml'], 
 
 
 gulp.task('default', ['browser-sync']);
-
-
-
-
