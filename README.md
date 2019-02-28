@@ -19,4 +19,8 @@ a gulp project structure for my self
 #### gulpfile.js   （gulp的配置文件，一个用管道思想构建很多个task解放双手的玩意儿，跟项目的目录结构很大关系）
 
 ## 如何使用
-git clone本项目到你的电脑，cd进入项目目录，之后cnpm i安装开发清单（package.json）上列出的所需工具和原料后，键入gulp即可【安装依赖的话推荐使用cnpm代替npm，快而且丢包少，如果用npm i之后项目gulp不起来，可以尝试rimraf node_modules后cnpm i重装所有node_modules】
+git clone本项目到你的电脑，cd进入项目目录，之后cnpm i安装开发清单（package.json）上列出的所需工具和原料后，键入gulp即可
+
+如果输入gulp报错gulp command not found，输入cnpm install --global gulp把 gulp 全局安装一下就好了。然后输入gulp就能看到效果啦！
+
+【安装依赖的话推荐使用cnpm代替npm，快而且丢包少，如果用npm i之后项目gulp不起来，可以尝试rimraf node_modules后cnpm i重装所有node_modules】
